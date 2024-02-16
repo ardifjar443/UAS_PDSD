@@ -56,64 +56,140 @@ dataPerHari = dataBike.groupby('Hari')['cnt'].mean()
 dataTipeHari = dataBike.groupby('Tipe Hari')['cnt'].mean()
 
 
-data = {
-    'Musim': ['Musim Semi', 'Musim Panas', 'Musim Gugur', 'Musim Dingin'],
-    'Jumlah Penyewa': [100, 150, 120, 80]
-}
-
-
-# Plot data
-fig, ax = plt.subplots()
-dataMusim.plot(kind='bar', x='Musim', y='Jumlah Penyewa', color=['pink', 'blue', 'red', 'orange'], ax=ax)
-plt.title('Perbandingan rata-rata Jumlah Penyewa Sepeda per Musim')
-plt.xlabel('Musim')
-plt.ylabel('Jumlah Pengguna')
-plt.xticks(rotation=0)
-
-# Tampilkan plot menggunakan Streamlit
-st.pyplot(fig)
 
 
 
-st.write("""
-         # My first app
-         Hello, para calon praktisi data masa depan!
-         """)
+tab1, tab2 = st.tabs(["Tab 1", "Tab 2"])
+with tab1:
+    st.header("Tab 1")
+    
+    # Plot data
+    fig, ax = plt.subplots()
 
-labelCuaca = jumlahCuacaMusimSemi.index.map({1: 'Cerah, Sedikit awan, Berawan sebagian, Berawan sebagian', 2: 'Kabut + Berawan, Kabut + Awan pecah, Kabut + Sedikit awan, Kabut', 3: 'Salju Ringan, Hujan Ringan + Badai Petir + Awan Tersebar, Hujan Ringan + Awan Tersebar', 4: 'Hujan Lebat + Palet Es + Badai Petir + Kabut, Salju + Kabut'}).tolist()
+    st.write("## Perbandingan rata-rata Jumlah Penyewa Sepeda per Musim")
+    dataMusim.plot(kind='bar', x='Musim', y='Jumlah Penyewa', color=['pink', 'blue', 'red', 'orange'], ax=ax)
+    plt.xlabel('Musim' , color="white")
+    plt.ylabel('Jumlah Pengguna' , color="white")
+    plt.xticks(rotation=0)
+    # Set warna garis sumbu x dan y menjadi putih
+    st.pyplot(fig)
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(14, 6))
-fig.suptitle('Perbandingan jumlah penyewa percuaca tiap Musim ')
 
-axes[0 , 0].bar(jumlahCuacaMusimSemi.index.astype(str), jumlahCuacaMusimSemi, color=['blue', 'green', 'orange', 'red'] ,label=labelCuaca)
-axes[0 , 0].set_title('Musim Semi')
-axes[0 , 0].set_xlabel('Musim')
-axes[0 , 0].set_ylabel('Jumlah Penyewa')
-axes[0 , 0].set_ylim([0, 7000])  
-axes[0 , 0].set_xticks([])
+    cuaca_index = st.radio(
+    label="Pilih Cuaca: ",
+    options=(1, 2, 3, 4),
+    horizontal=True
+    )
 
-axes[0, 1].bar(jumlahCuacaMusimDingin.index.astype(str), jumlahCuacaMusimDingin, color=['blue', 'green', 'orange', 'red'])
-axes[0, 1].set_title('Musim Dingin')
-axes[0, 1].set_xlabel('Musim')
-axes[0, 1].set_ylabel('Jumlah Penyewa')
-axes[0, 1].set_ylim([0, 7000])
-axes[0, 1].set_xticks([])
 
-axes[1, 0].bar(jumlahCuacaMusimGugur.index.astype(str), jumlahCuacaMusimGugur, color=['blue', 'green', 'orange', 'red'])
-axes[1, 0].set_title('Musim Gugur')
-axes[1, 0].set_xlabel('Musim')
-axes[1, 0].set_ylabel('Jumlah Penyewa')
-axes[1, 0].set_ylim([0, 7000]) 
-axes[1, 0].set_xticks([])
 
-axes[1, 1].bar(jumlahCuacaMusimPanas.index.astype(str), jumlahCuacaMusimPanas, color=['blue', 'green', 'orange', 'red'])
-axes[1, 1].set_title('Musim Panas')
-axes[1, 1].set_xlabel('Musim')
-axes[1, 1].set_ylabel('Jumlah Penyewa')
-axes[1, 1].set_ylim([0, 7000])
-axes[1, 1].set_xticks([])
+    labelCuaca = {1: 'Cerah, Sedikit awan, Berawan sebagian, Berawan sebagian',
+                2: 'Kabut + Berawan, Kabut + Awan pecah, Kabut + Sedikit awan, Kabut',
+                3: 'Salju Ringan, Hujan Ringan + Badai Petir + Awan Tersebar, Hujan Ringan + Awan Tersebar',
+                4: 'Hujan Lebat + Palet Es + Badai Petir + Kabut, Salju + Kabut'}
 
-fig.legend(loc='center left', bbox_to_anchor=(1, 0.5), title='Legenda')
-plt.subplots_adjust(right=0.85)
-plt.tight_layout()
-st.pyplot(fig)
+    colors = ['blue', 'green', 'orange', 'red']
+
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    st.write(f'### Perbandingan jumlah penyewa untuk cuaca: {labelCuaca[cuaca_index]}')
+
+    bar_width = 0.2
+    bar_positions = [1, 2, 3, 4]
+
+    for i, (musim, jumlah) in enumerate(zip([jumlahCuacaMusimSemi, jumlahCuacaMusimDingin, jumlahCuacaMusimGugur, jumlahCuacaMusimPanas], ['Musim Semi', 'Musim Dingin', 'Musim Gugur', 'Musim Panas'])):
+        ax.bar(bar_positions[i], musim[cuaca_index], color=colors[i], width=bar_width, label=jumlah)
+
+    ax.set_xticks([x + bar_width for x in bar_positions])
+    ax.set_xticklabels(['Musim Semi', 'Musim Dingin', 'Musim Gugur', 'Musim Panas'])
+    ax.set_ylabel('Jumlah Penyewa')
+
+    ax.legend(title='Musim', loc='upper left', title_fontsize='large')
+    plt.tight_layout()
+    st.pyplot(fig)
+
+    fig, ax = plt.subplots()
+    ax.pie(dataPerHari, labels=dataPerHari.index ,   autopct='%1.1f%%', startangle=140)
+    st.write("## diagram penyewa tiap Hari")
+    st.pyplot(fig)
+
+
+
+    fig, ax = plt.subplots()
+    plt.bar(dataTipeHari.index, dataTipeHari, color=['red','blue'])
+    st.write('## Perbandingan rata-rata penyewa weekday dan weekend')
+    plt.xlabel('tipe hari')
+    plt.ylabel('jumlah penyewa')
+
+    for i , value in enumerate(dataTipeHari):
+        plt.text(i,value/2, int(value), ha='center',va='center', color="white", fontweight='bold')
+
+    st.pyplot(fig)
+
+    fig, ax = plt.subplots()
+    plt.plot(dataHour.index, dataHour , marker='o', linestyle='-', color='blue')
+    plt.xticks(rotation=90)
+    st.write('## diagram rata-rata penyewa tiap jam')
+    plt.xlabel('jam')
+    plt.ylabel('jumlah penyewa')
+    st.pyplot(fig)
+
+
+    fig, ax = plt.subplots()
+    plt.bar(dataPertahun.index.astype(str), dataPertahun, color=['red','blue'])
+    st.write('## perbandingan jumlah penyewa tiap tahun')
+    plt.xlabel('tahun')
+    plt.ylabel('jumlah penyewa')
+
+    for i , value in enumerate(dataPertahun):
+        plt.text(i,value/2, str(value), ha='center',va='center', color="white", fontweight='bold')
+
+    st.pyplot(fig)
+    st.write(f'### dari 2011 ke 2012 mengalami kenaikan sebesar {int(((dataPertahun[2012]- dataPertahun[2011])/dataPertahun[2011])*100)}%')
+
+
+
+    colors = {'Musim Dingin': 'blue', 'Musim Semi': 'green', 'Musim Panas': 'red', 'Musim Gugur': 'orange'}
+    bulan = [i[0] for i in dataPerbulanMusim.index]
+    pengguna = [i for i in dataPerbulanMusim]
+
+    fig, ax = plt.subplots()
+    plt.bar([str(i[0]) for i in dataPerbulanMusim.index], [i for i in dataPerbulanMusim], color=[colors[i[1]] for i in dataPerbulanMusim.index],  label=[i[1] for i in dataPerbulanMusim.index] )
+    st.write('## data rata-rata penyewa tiap bulan (Musim)')
+    plt.xticks(rotation = 90)
+    plt.xlabel('bulan')
+    plt.ylabel('jumlah penyewa')
+
+    legend_labels = ['Musim Dingin', 'Musim Semi', 'Musim Panas', 'Musim Gugur']
+    legend_colors = ['blue', 'green', 'red', 'orange']
+    legend_patches = [mpatches.Patch(color=color, label=label) for color, label in zip(legend_colors, legend_labels)]
+    plt.legend(handles=legend_patches,  title='Musim', bbox_to_anchor=(1, 1))
+
+    st.pyplot(fig)
+
+
+
+    colors = {1: 'orange', 2: 'gray', 3: 'lightblue', 4: 'blue'}
+    bulan = [i[0] for i in dataPerbulanCuaca.index]
+    pengguna = [i for i in dataPerbulanCuaca]
+
+    fig, ax = plt.subplots()
+    plt.bar([str(i[0]) for i in dataPerbulanCuaca.index], [i for i in dataPerbulanCuaca], color=[colors[i[1]] for i in dataPerbulanCuaca.index],  label=[i[1] for i in dataPerbulanCuaca.index] )
+    st.write('## data rata-rata penyewa tiap bulan (Cuaca)')
+    plt.xticks(rotation = 90)
+    plt.xlabel('bulan')
+    plt.ylabel('jumlah penyewa')
+
+    legend_labels = ['Cerah, Sedikit awan, Berawan sebagian, Berawan sebagian',  'Kabut + Berawan, Kabut + Awan pecah, Kabut + Sedikit awan, Kabut', 'Salju Ringan, Hujan Ringan + Badai Petir + Awan Tersebar, Hujan Ringan + Awan Tersebar', 'Hujan Lebat + Palet Es + Badai Petir + Kabut, Salju + Kabut']
+    legend_colors = ['orange', 'gray', 'lightblue', 'blue']
+    legend_patches = [mpatches.Patch(color=color, label=label) for color, label in zip(legend_colors, legend_labels)]
+
+
+    st.pyplot(fig)
+    st.image('./img/legend1.png')
+   
+with tab2:
+    st.header("Tab 2")
+    st.write("# percobaan")
+
+
