@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 dataBike = pd.read_csv('./Bike-sharing-dataset/day.csv')
 dataBikeHour = pd.read_csv('./Bike-sharing-dataset/hour.csv')
@@ -14,6 +17,7 @@ dataBike['Tipe Hari'] = dataBike['Hari'].apply(lambda x : 'Weekend' if x in ['Sa
 dataBikeHour['jam'] = dataBikeHour['hr'].apply(lambda x : f"{x:02d}:00") # menambah kolom jam 
 dataBike['tahun']= dataBike['dteday'].dt.year # menambah kolom tahun
 dataBike['musim'] = dataBike['season'].map({1: 'Musim Semi', 2: 'Musim Panas', 3: 'Musim Gugur', 4: 'Musim Dingin'})
+
 
 dataPerbulanMusim = dataBike.groupby(['bulan', 'musim'])['cnt'].mean()
 dataPerbulanMusim = dataPerbulanMusim.ffill()
@@ -54,6 +58,9 @@ for i in range(1,5):
 dataPerHari = dataBike.groupby('Hari')['cnt'].mean()
 
 dataTipeHari = dataBike.groupby('Tipe Hari')['cnt'].mean()
+
+dataBikeHour['dteday'] = pd.to_datetime(dataBikeHour['dteday']).dt.dayofweek 
+dataBikeHour['jam'] = pd.to_datetime(dataBikeHour['jam']).dt.hour 
 
 
 
@@ -191,5 +198,68 @@ with tab1:
 with tab2:
     st.header("Tab 2")
     st.write("# percobaan")
+    st.write(dataBikeHour)
+    
+    # Preprocessing data
+    dataBikeHour['hari'] = pd.to_datetime(dataBikeHour['dteday']).dt.dayofweek  # Mengubah tanggal menjadi hari dalam seminggu
+    X = dataBikeHour[['hari','season', 'weathersit', 'jam']]
+    y = dataBikeHour['cnt']
+
+    # Membagi data menjadi data latih dan data uji
+        
+    # Membagi data menjadi data latih dan data uji
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Normalisasi fitur
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+
+    # Load model yang sudah disimpan
+    model = tf.keras.models.load_model("rental_sepeda_model")
+
+    # Melakukan prediksi pada data uji
+    predictions = model.predict(X_test_scaled)
+
+    # Ambil sebagian data untuk ditampilkan
+    n = 50  # Ubah nilai n sesuai keinginan Anda
+    y_test_subset = y_test.values[:n]
+    predictions_subset = predictions[:n]
+
+    # Visualisasi prediksi vs. data aktual
+    fig, ax = plt.subplots()
+    plt.plot(y_test_subset, label='Data Aktual', color='blue')
+    plt.plot(predictions_subset, label='Prediksi', color='red')
+    plt.title('Prediksi vs. Data Aktual')
+    plt.xlabel('Indeks Data Uji')
+    plt.ylabel('Permintaan')
+    plt.legend()
+    st.pyplot(fig)
+    
+    n = 100  # Ubah nilai n sesuai dengan keinginan Anda
+    errors_subset = (y_test.values - predictions.squeeze())[:n]
+    
+    # Visualisasi kesalahan prediksi
+    fig, ax = plt.subplots()
+    plt.plot(errors_subset, marker='o', linestyle='', color='green')
+    plt.title('Kesalahan Prediksi')
+    plt.xlabel('Indeks Data Uji')
+    plt.ylabel('Kesalahan')
+    st.pyplot(fig)
+    
+    n = 100  # Ubah nilai n sesuai dengan keinginan Anda
+    X_test_subset = X_test['jam'][:n]
+    y_test_subset = y_test.values[:n]
+    predictions_subset = predictions[:n]
+
+    # Visualisasi prediksi terhadap jam
+    fig, ax = plt.subplots()
+    plt.scatter(X_test_subset, y_test_subset, label='Data Aktual', color='blue')
+    plt.scatter(X_test_subset, predictions_subset, label='Prediksi', color='red')
+    plt.title('Prediksi vs. Data Aktual Berdasarkan Jam')
+    plt.xlabel('Jam')
+    plt.ylabel('Permintaan')
+    plt.legend()
+    st.pyplot(fig)
 
 
