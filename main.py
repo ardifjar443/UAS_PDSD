@@ -65,10 +65,10 @@ dataBikeHour['jam'] = pd.to_datetime(dataBikeHour['jam']).dt.hour
 
 
 
-
-tab1, tab2 = st.tabs(["Tab 1", "Tab 2"])
+st.header("Analisis Penyewaan Sepeda")
+tab1, tab2 = st.tabs(["Visualisasi Data", "Analisis"])
 with tab1:
-    st.header("Tab 1")
+    st.header("Visualisasi Data")
     
     # Plot data
     fig, ax = plt.subplots()
@@ -82,6 +82,9 @@ with tab1:
     st.pyplot(fig)
 
 
+
+
+    st.write("## Perbandingan Tiap Cuaca")
     cuaca_index = st.radio(
     label="Pilih Cuaca: ",
     options=(1, 2, 3, 4),
@@ -114,11 +117,17 @@ with tab1:
     ax.legend(title='Musim', loc='upper left', title_fontsize='large')
     plt.tight_layout()
     st.pyplot(fig)
+    with st.expander("Penjelasan"):
+        st.write("seperti yang dilihat untuk cuaca dilabel 4 yaitu Hujan Lebat + Palet Es + Badai Petir + Kabut, Salju + Kabut, itu tidak ada sama sekali penyewan sepeda")
+
 
     fig, ax = plt.subplots()
     ax.pie(dataPerHari, labels=dataPerHari.index ,   autopct='%1.1f%%', startangle=140)
     st.write("## diagram penyewa tiap Hari")
     st.pyplot(fig)
+    with st.expander("Penjelasan"):
+        st.write("diliat dari data diatas untuk semua hari itu tidak ada perbedaan signifikan untuk jumlah penyewa tiap harinya")
+
 
 
 
@@ -132,6 +141,9 @@ with tab1:
         plt.text(i,value/2, int(value), ha='center',va='center', color="white", fontweight='bold')
 
     st.pyplot(fig)
+    with st.expander("Penjelasan"):
+        st.write("diliat dari data diatas tidak ada perbedaan jauh jumlah penyewa sepeda dihari weakend ataupun weekday")
+
 
     fig, ax = plt.subplots()
     plt.plot(dataHour.index, dataHour , marker='o', linestyle='-', color='blue')
@@ -140,6 +152,11 @@ with tab1:
     plt.xlabel('jam')
     plt.ylabel('jumlah penyewa')
     st.pyplot(fig)
+    with st.expander("Penjelasan"):
+        st.write("""
+                 dilihat dari diagram diatas banyak yang melakukan penyewaan sepeda
+                 """)
+
 
 
     fig, ax = plt.subplots()
@@ -194,12 +211,16 @@ with tab1:
 
     st.pyplot(fig)
     st.image('./img/legend1.png')
+    with st.expander("Penjelasan"):
+        st.write("seperti yang dilihat untuk cuaca Hujan Lebat + Palet Es + Badai Petir + Kabut, Salju + Kabut, itu tidak ada sama sekali penyewan sepeda")
+
    
 with tab2:
-    st.header("Tab 2")
-    st.write("# percobaan")
-    st.write(dataBikeHour)
-    
+    st.header("Analisis Data Mining")
+    st.write("""
+              Dengan menggunakan metode regresi atau time series analysis, akan memprediksi penyewa sepeda di masa depan berdasarkan variabel-variabel seperti musim, cuaca, hari, dan jam.
+             """)
+   
     # Preprocessing data
     dataBikeHour['hari'] = pd.to_datetime(dataBikeHour['dteday']).dt.dayofweek  # Mengubah tanggal menjadi hari dalam seminggu
     X = dataBikeHour[['hari','season', 'weathersit', 'jam']]
@@ -220,11 +241,11 @@ with tab2:
 
     # Melakukan prediksi pada data uji
     predictions = model.predict(X_test_scaled)
+    
+    n1 = st.slider('berapa banyak data yang mau diprediksi ?', 0, 200, 25, key="slider1")
 
-    # Ambil sebagian data untuk ditampilkan
-    n = 50  # Ubah nilai n sesuai keinginan Anda
-    y_test_subset = y_test.values[:n]
-    predictions_subset = predictions[:n]
+    y_test_subset = y_test.values[:n1]
+    predictions_subset = predictions[:n1]
 
     # Visualisasi prediksi vs. data aktual
     fig, ax = plt.subplots()
@@ -232,12 +253,14 @@ with tab2:
     plt.plot(predictions_subset, label='Prediksi', color='red')
     plt.title('Prediksi vs. Data Aktual')
     plt.xlabel('Indeks Data Uji')
-    plt.ylabel('Permintaan')
+    plt.ylabel('penyewa')
     plt.legend()
     st.pyplot(fig)
     
-    n = 100  # Ubah nilai n sesuai dengan keinginan Anda
-    errors_subset = (y_test.values - predictions.squeeze())[:n]
+    
+    n2 = st.slider('berapa banyak data yang mau diprediksi ?', 0, 200, 25, key="slider2")
+
+    errors_subset = (y_test.values - predictions.squeeze())[:n2]
     
     # Visualisasi kesalahan prediksi
     fig, ax = plt.subplots()
@@ -247,10 +270,10 @@ with tab2:
     plt.ylabel('Kesalahan')
     st.pyplot(fig)
     
-    n = 100  # Ubah nilai n sesuai dengan keinginan Anda
-    X_test_subset = X_test['jam'][:n]
-    y_test_subset = y_test.values[:n]
-    predictions_subset = predictions[:n]
+    n3 = st.slider('berapa banyak data yang mau diprediksi ?', 0, 200, 25, key="slider3")
+    X_test_subset = X_test['jam'][:n3]
+    y_test_subset = y_test.values[:n3]
+    predictions_subset = predictions[:n3]
 
     # Visualisasi prediksi terhadap jam
     fig, ax = plt.subplots()
@@ -258,7 +281,7 @@ with tab2:
     plt.scatter(X_test_subset, predictions_subset, label='Prediksi', color='red')
     plt.title('Prediksi vs. Data Aktual Berdasarkan Jam')
     plt.xlabel('Jam')
-    plt.ylabel('Permintaan')
+    plt.ylabel('penyewa')
     plt.legend()
     st.pyplot(fig)
 
